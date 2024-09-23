@@ -42,7 +42,6 @@ class Botto:
             raise RuntimeError(f'Failed to get messages, code {response.status_code}')
 
         data = response.json()
-        print(data)
 
         for message in data['result']:
             if message not in self.messages and not self.last_updated:
@@ -50,9 +49,14 @@ class Botto:
             else:
                 self.messages.append(message) if message['message']['date'] > self.last_updated else None
 
+        if not self.messages:
+            return
+
         last_updated = max([message["message"]["date"] for message in self.messages])
 
         self.last_updated = last_updated
+
+        self.update_config()
 
     def handle_message(self):
         if not self.is_configured and len(self.messages) != 0:

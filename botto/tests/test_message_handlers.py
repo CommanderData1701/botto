@@ -40,6 +40,18 @@ class TestInitialSetupHandler(unittest.TestCase):
     def test_initial_setup_with_name_change(self):
         pass
 
+    def test_initial_setup_with_user_change(self):
+        pass
+
+    def test_initial_setup_with_user_and_name_change(self):
+        pass
+
+    def test_initial_setup_with_invalid_response_at_name_change(self):
+        pass
+
+    def test_initial_setup_with_invalid_response_at_user_change(self):
+        pass
+
 
 if __name__ == '__main__':
     unittest.main()

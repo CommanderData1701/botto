@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Union
 
 
 class Done(Enum):
@@ -28,7 +29,7 @@ class SetupHandler(Handler):
     def __init__(self) -> None:
         self.state = self.State.BEGIN
 
-    def __call__(self) -> dict[str, str]:
+    def __call__(self) -> dict:
         if self.state != Done.DONE:
             raise ValueError("Handler is not done yet")
 

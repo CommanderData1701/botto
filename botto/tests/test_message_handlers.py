@@ -112,7 +112,49 @@ class TestInitialSetupHandler(unittest.TestCase):
         self.assertEqual(handler(), result_dict)
 
     def test_initial_setup_with_user_and_name_change(self):
-        pass
+        handler = SetupHandler()
+        self.assertEqual(handler.state, SetupHandler.State.BEGIN)
+
+        response = handler.generate_response("Never tell me the odds!")
+
+        self.assertEqual(response, "Hello! You are now the root user. What's your name?")
+        self.assertEqual(handler.state, SetupHandler.State.CONFIRM_NAME)
+
+        response = handler.generate_response("Indiana Jones")
+
+        self.assertEqual(response, "Hello, Indiana Jones! Is this correct? (yes/no)")
+        self.assertEqual(handler.state, SetupHandler.State.CHANGE_NAME)
+
+        response = handler.generate_response("no")
+        self.assertEqual(response, "Ok, what is it then?")
+        self.assertEqual(handler.state, SetupHandler.State.CONFIRM_NAME)
+
+        response = handler.generate_response("Han")
+        self.assertEqual(response, "Hello, Han! Is this correct? (yes/no)")
+
+        response = handler.generate_response("yes")
+        self.assertEqual(response, "Great! Now tell us who your roommates are. (Seperated by commas)")
+        self.assertEqual(handler.state, SetupHandler.State.SET_UP_USERS)
+
+        response = handler.generate_response("C3PO, R2D2")
+        expected_response = """Are C3PO, R2D2 your roommates? (yes/no)"""
+        self.assertEqual(response, expected_response)
+        self.assertEqual(handler.state, SetupHandler.State.CONFIRM_USERS)
+
+        response = handler.generate_response("no")
+        self.assertEqual(response, "Ok, who are they then?")
+        self.assertEqual(handler.state, SetupHandler.State.SET_UP_USERS)
+
+        response = handler.generate_response("Luke, Leia, Chewbacca")
+        expected_response = """Are Luke, Leia, Chewbacca your roommates? (yes/no)"""
+        self.assertEqual(response, expected_response)
+        self.assertEqual(handler.state, SetupHandler.State.CONFIRM_USERS)
+
+        response = handler.generate_response("yes")
+        self.assertEqual(handler.state, Done.DONE)
+        self.assertEqual(response, "All set!")
+        result_dict = {"root_name": "Han", "roommates": ["Luke", "Leia", "Chewbacca"]}
+        self.assertEqual(handler(), result_dict)
 
     def test_initial_setup_with_invalid_response_at_name_change(self):
         pass

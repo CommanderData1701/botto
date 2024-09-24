@@ -1,6 +1,6 @@
 # ![Botto logo](img/logo.png)
 
-![Python Version](https://img.shields.io/badge/python-3.10-green)
+![Python Version](https://img.shields.io/badge/python->3.10-green)
 ![Version](https://img.shields.io/badge/version-1.0.0-green)
 
 Botto is a client side application that functions as a telegram chat bot to organise your shared apartment life. 

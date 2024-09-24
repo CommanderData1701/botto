@@ -32,7 +32,7 @@ class TestInitialSetupHandler(unittest.TestCase):
         self.assertEqual(handler.state, SetupHandler.State.CONFIRM_USERS)
 
         response = handler.generate_response("yes")
-        self.assertEqual(response, "All set!")
+        self.assertEqual(handler.state, Done.DONE)
         self.assertEqual(response, "All set!")
         result_dict = {"root_name": "John", "roommates": ["John", "Jane", "Doe"]}
         self.assertEqual(handler(), result_dict)

@@ -1,19 +1,18 @@
 from .user import User
 from .database import Database
-
+from .message import Message
 from .message_handlers import (
     Done,
     SetupHandler,
 )
 
-from random import choice
 import json
 import os
 import requests
 
 
 class Botto:
-    def __init__(self, mock_db_connection=None):
+    def __init__(self, mock_db_connection=None, mock_requests=None):
         try:
             self.load_config()
         except FileNotFoundError:
@@ -21,39 +20,58 @@ class Botto:
             self.load_config()
 
         self.database = Database(mock_db_connection)
-        self.token = os.getenv('BOT_TOKEN')
+        self.token: str = os.getenv('BOT_TOKEN')
+
+        if mock_requests:
+            self.requests = mock_requests
+        else:
+            self.requests = requests
 
         if not self.token:
             raise ValueError('BOT_TOKEN environment variable is not set')
 
-        self.users = self.database.get_users()
-        self.unregistered_users = list()
+        self.users: list[User] = self.database.get_users()
+        self.unregistered_users: list[User] = list()
 
-        self.messages = list()
+        self.messages: list[Message] = list()
 
     def reload(self):
         self.users = self.database.get_users()
 
     def get_messages(self) -> None:
-        response = requests.get(
-            f'https://api.telegram.org/bot{self.token}/getUpdates'
-        )
+        if self.last_updated:
+            response = self.requests.get(
+                f'https://api.telegram.org/bot{self.token}/getUpdates?offset={self.last_updated + 1}'
+            )
+        else:
+            response = self.requests.get(
+                f'https://api.telegram.org/bot{self.token}/getUpdates'
+            )
 
         if response.status_code != 200:
             raise RuntimeError(f'Failed to get messages, code {response.status_code}')
 
         data = response.json()
+        if not data['ok']:
+            return
 
         for message in data['result']:
-            if message not in self.messages and not self.last_updated:
-                self.messages.append(message)
-            else:
-                self.messages.append(message) if message['message']['date'] > self.last_updated else None
+            try:
+                chat_id = message['message']['chat']['id']
+                date = message['update_id']
+                content = message['message']['text']
+
+                self.messages.append(Message(chat_id, date, content))
+
+            except KeyError:
+                continue
 
         if not self.messages:
             return
 
-        last_updated = max([message["message"]["date"] for message in self.messages])
+        self.messages.sort()
+
+        last_updated = self.messages[-1].date
 
         self.last_updated = last_updated
 
@@ -63,7 +81,6 @@ class Botto:
         if not self.is_configured and len(self.messages) != 0:
             self.users.append(self.database.create_user('root', is_admin=True))
             self.setup()
-            self.is_configured = True
             self.update_config()
 
         registered_user_messages = [
@@ -86,13 +103,11 @@ class Botto:
 
     def setup(self):
         message = self.messages[0]
-        chat_id = message['message']['chat']['id']
-        message_text = message['message']['text']
+        chat_id = message.chat_id
+        message_text = message.content
 
         self.users[0].chat_id = chat_id
         self.users[0].handler = SetupHandler()
-
-        print(self.users[0])
 
         self.database.set_user_chat_id(self.users[0], chat_id)
 

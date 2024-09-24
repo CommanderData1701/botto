@@ -59,6 +59,12 @@ class SetupHandler(Handler):
             case self.State.SET_UP_USERS:
                 self.users = message.split(",")
                 self.users = [user.strip() for user in self.users]
+                checklist = self.users.copy()
+                checklist.append(self.root_name)
+
+                if len(checklist) != len(set(checklist)):
+                    return "There are douplicates in the users. Please provide a unique list of users."
+
                 self.state = self.State.CONFIRM_USERS
                 user_string = ", ".join(self.users)
                 return self.State.CONFIRM_USERS(user_string)

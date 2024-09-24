@@ -50,13 +50,15 @@ class Database:
 
         return User(token=token, chat_id=chat_id, name=name, is_admin=is_admin == 1)
 
-    def update_user(self, old_user: User, new_user: User) -> None:
+    def update_user(self, old_user: User, new_user: User) -> User:
         self.cursor.execute('''
             UPDATE users
             SET chat_id = ?, name = ?, is_admin = ?
             WHERE name = ?
         ''', (new_user.chat_id, new_user.name, new_user.is_admin, old_user.name))
         self.connection.commit()
+
+        return old_user
 
     def set_user_chat_id(self, user: User, chat_id: int) -> None:
         self.cursor.execute('UPDATE users SET chat_id = ? WHERE name = ?', (chat_id, user.name))

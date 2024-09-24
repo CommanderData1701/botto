@@ -23,7 +23,8 @@ class Botto:
         self.database = Database()
         self.token = os.getenv('BOT_TOKEN')
 
-        self.database.create_tables()
+        if not self.token:
+            raise ValueError('BOT_TOKEN environment variable is not set')
 
         self.users = self.database.get_users()
         self.unregistered_users = list()

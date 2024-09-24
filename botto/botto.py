@@ -13,14 +13,14 @@ import requests
 
 
 class Botto:
-    def __init__(self):
+    def __init__(self, mock_db_connection=None):
         try:
             self.load_config()
         except FileNotFoundError:
             self.create_config()
             self.load_config()
 
-        self.database = Database()
+        self.database = Database(mock_db_connection)
         self.token = os.getenv('BOT_TOKEN')
 
         if not self.token:

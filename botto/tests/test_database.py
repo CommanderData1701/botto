@@ -35,7 +35,6 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(user.name, "Jane Doe")
         self.assertIsNone(user.chat_id)
         self.assertEqual(user.is_admin, True)
-        
 
 
 if __name__ == "__main__":

@@ -41,9 +41,9 @@ class SetupHandler(Handler):
                 return self.State.BEGIN.value
 
             case self.State.CONFIRM_NAME:
-                self.root_name = message
+                self.root_name = message.strip()
                 self.state = self.State.CHANGE_NAME
-                return self.State.CONFIRM_NAME(message)
+                return self.State.CONFIRM_NAME(self.root_name)
 
             case self.State.CHANGE_NAME:
                 if message.lower() == "yes":
@@ -67,8 +67,8 @@ class SetupHandler(Handler):
                 if message.lower() == "yes":
                     return Done.DONE.value
                 elif message.lower() == "no":
-                    self.state = self.State.CHANGE_USERS
-                    return self.State.CHANGE_USERS
+                    self.state = self.State.SET_UP_USERS
+                    return self.State.CHANGE_USERS.value
                 else:
                     return "Answer must be 'yes' or 'no"
 

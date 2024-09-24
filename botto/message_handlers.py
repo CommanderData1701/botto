@@ -71,5 +71,5 @@ class SetupHandler(Handler):
                     self.state = self.State.SET_UP_USERS
                     return self.State.CHANGE_USERS.value
                 else:
-                    return "Answer must be 'yes' or 'no"
+                    return "Answer must be 'yes' or 'no'"
 

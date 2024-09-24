@@ -38,7 +38,40 @@ class TestInitialSetupHandler(unittest.TestCase):
         self.assertEqual(handler(), result_dict)
 
     def test_initial_setup_with_name_change(self):
-        pass
+        handler = SetupHandler()
+        self.assertEqual(handler.state, SetupHandler.State.BEGIN)
+
+        response = handler.generate_response("Hello")
+
+        self.assertEqual(response, "Hello! You are now the root user. What's your name?")
+        self.assertEqual(handler.state, SetupHandler.State.CONFIRM_NAME)
+
+        response = handler.generate_response("Max")
+
+        self.assertEqual(response, "Hello, Max! Is this correct? (yes/no)")
+        self.assertEqual(handler.state, SetupHandler.State.CHANGE_NAME)
+
+        response = handler.generate_response("no")
+        self.assertEqual(response, "Ok, what is it then?")
+        self.assertEqual(handler.state, SetupHandler.State.CONFIRM_NAME)
+
+        response = handler.generate_response("Marie")
+        self.assertEqual(response, "Hello, Marie! Is this correct? (yes/no)")
+
+        response = handler.generate_response("yes")
+        self.assertEqual(response, "Great! Now tell us who your roommates are. (Seperated by commas)")
+        self.assertEqual(handler.state, SetupHandler.State.SET_UP_USERS)
+
+        response = handler.generate_response("Albert, Nils, Werner")
+        expected_response = """Are Albert, Nils, Werner your roommates? (yes/no)"""
+        self.assertEqual(response, expected_response)
+        self.assertEqual(handler.state, SetupHandler.State.CONFIRM_USERS)
+
+        response = handler.generate_response("yes")
+        self.assertEqual(handler.state, Done.DONE)
+        self.assertEqual(response, "All set!")
+        result_dict = {"root_name": "Marie", "roommates": ["Albert", "Nils", "Werner"]}
+        self.assertEqual(handler(), result_dict)
 
     def test_initial_setup_with_user_change(self):
         pass

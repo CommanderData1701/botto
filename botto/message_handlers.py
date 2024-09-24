@@ -51,7 +51,7 @@ class SetupHandler(Handler):
                     return self.State.SET_UP_USERS.value
                 elif message.lower() == "no":
                     self.state = self.State.CONFIRM_NAME
-                    return self.State.CHANGE_NAME
+                    return self.State.CHANGE_NAME.value
                 else:
                     return "Answer must be 'yes' or 'no'"
 

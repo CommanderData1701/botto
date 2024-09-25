@@ -12,7 +12,7 @@ import requests
 
 
 class Botto:
-    def __init__(self, mock_db_connection=None, mock_requests=None):
+    def __init__(self, mock_db_connection=None, mock_requests=None, mock_token=False):
         try:
             self.load_config()
         except FileNotFoundError:
@@ -27,6 +27,8 @@ class Botto:
         else:
             self.requests = requests
 
+        if mock_token:
+            self.token = "ABCDEFGHIJKLMNOPQRSTUVWXZY1234567890"
         if not self.token:
             raise ValueError('BOT_TOKEN environment variable is not set')
 
@@ -58,10 +60,12 @@ class Botto:
         for message in data['result']:
             try:
                 chat_id = message['message']['chat']['id']
-                date = message['update_id']
+                update_id = message['update_id']
                 content = message['message']['text']
 
-                self.messages.append(Message(chat_id, date, content))
+                self.messages.append(
+                    Message(chat_id=chat_id, update_id=update_id, content=content)
+                )
 
             except KeyError:
                 continue
@@ -71,7 +75,7 @@ class Botto:
 
         self.messages.sort()
 
-        last_updated = self.messages[-1].date
+        last_updated = self.messages[-1].update_id
 
         self.last_updated = last_updated
 

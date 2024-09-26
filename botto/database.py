@@ -60,6 +60,10 @@ class Database:
 
         return old_user
 
+    def update_user_name(self, old_name: str, new_name: str) -> User:
+        self.cursor.execute('UPDATE users SET name = ? WHERE name = ?', (new_name, old_name))
+        self.connection.commit()
+
     def set_user_chat_id(self, user: User, chat_id: int) -> None:
         self.cursor.execute('UPDATE users SET chat_id = ? WHERE name = ?', (chat_id, user.name))
         self.connection.commit()

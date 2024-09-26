@@ -87,18 +87,36 @@ class Botto:
             self.setup()
             self.update_config()
 
+        chat_ids = [user.chat_id for user in self.users]
+
         registered_user_messages = [
-            (message, user) 
+            message 
             for message in self.messages 
-            for user in self.users 
-            if user.chat_id == message['message']['chat']['id']
+            if message.chat_id in chat_ids
         ]
 
-        for message, user in registered_user_messages:
+        for message in registered_user_messages:
+            user = [user for user in self.users if user.chat_id == message.chat_id][0]
             response = user.handle_message(message['message']['text'])
             if user.handler and user.handler.state == Done.DONE:
+                self.send_message(response, [user])
                 if isinstance(user.handler, SetupHandler):
-                    pass
+                    data_dict = user.handler()
+
+                    self.database.update_user_name("root", data_dict["root_name"])
+
+                    for user_name in data_dict["roommates"]:
+                        self.user.append(self.database.create_user(user_name))
+
+                    message = "Here you go! All users and their tokens:\n\n" + "\n".join(
+                        [f"{user.name}: {user.token}" for user in self.users]
+                    )
+                    message += "\nThey just need to provide them when writing to me and they can get started!"
+                    self.send_message(message, [user])
+                    self.is_configured = True
+                    self.update_config()
+                return
+
 
             self.send_message(response, [user])
 
@@ -135,7 +153,7 @@ class Botto:
             id = user.chat_id
 
             if id:
-                response = requests.post(
+                response = self.requests.post(
                     f'https://api.telegram.org/bot{self.token}/sendMessage',
                     json={
                         'chat_id': id,

@@ -112,6 +112,7 @@ class Botto:
                         [f"{user.name}: {user.token}" for user in self.users]
                     )
                     message += "\nThey just need to provide them when writing to me and they can get started!"
+                    user.handler = None
                     self.send_message(message, [user])
                     self.is_configured = True
                     self.update_config()

@@ -24,7 +24,8 @@ class TestDatabase(unittest.TestCase):
         self.assertTrue(("John Doe", None, users[0][2], 0) in users)
         self.assertTrue(("Jane Doe", None, users[1][2], 1) in users)
         self.assertTrue(all(len(token) == 6 for _, _, token, _ in users))
-        self.assertTrue(all(token.isalnum() and token == token.lower() for _, _, token, _ in users))
+        self.assertTrue(all(token.isalnum() and token == token.lower()
+            for _, _, token, _ in users))
 
         user = user_objects[0]
         self.assertEqual(user.name, "John Doe")

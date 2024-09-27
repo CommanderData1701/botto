@@ -38,7 +38,6 @@ class TestDatabase(unittest.TestCase):
 
     def test_get_users(self):
         connection = sqlite3.connect(':memory:')
-        cursor = connection.cursor()
         db = Database(connection)
 
         db.create_user(name="John Doe", chat_id=43)

@@ -17,8 +17,6 @@ SetupHandler:
     Class that handles the setup process of the bot.
 """
 
-from typing import Optional
-
 from enum import Enum
 
 
@@ -54,7 +52,7 @@ class Handler:
     def __init__(self) -> None:
         raise NotImplementedError
 
-    def generate_response(self, message: str) -> Optional[str]:
+    def generate_response(self, message: str) -> str:
         """
         Generates a response based on the message received.
 
@@ -153,26 +151,26 @@ class SetupHandler(Handler):
 
         return {"root_name": self.root_name, "roommates": self.users}
 
-    def generate_response(self, message: str) -> Optional[str]:
+    def generate_response(self, message: str) -> str:
+        response = self.state.value
+
         match self.state:
             case self.State.BEGIN:
                 self.state = self.State.CONFIRM_NAME
-                return self.State.BEGIN.value
 
             case self.State.CONFIRM_NAME:
                 self.root_name = message.strip()
                 self.state = self.State.CHANGE_NAME
-                return self.State.CONFIRM_NAME.value.format(name=self.root_name)
+                response = response.format(name=self.root_name)
 
             case self.State.CHANGE_NAME:
                 if message.lower() == "yes":
                     self.state = self.State.SET_UP_USERS
-                    return self.State.SET_UP_USERS.value
-                if message.lower() == "no":
+                    response = self.State.SET_UP_USERS.value
+                elif message.lower() == "no":
                     self.state = self.State.CONFIRM_NAME
-                    return self.State.CHANGE_NAME.value
                 else:
-                    return "Answer must be 'yes' or 'no'"
+                    response = "Answer must be 'yes' or 'no'"
 
             case self.State.SET_UP_USERS:
                 self.users = message.split(",")
@@ -181,19 +179,23 @@ class SetupHandler(Handler):
                 checklist.append(self.root_name)
 
                 if len(checklist) != len(set(checklist)):
-                    return "There are douplicates in the users. Please" \
+                    response = "There are douplicates in the users. Please" \
                     + " provide a unique list of users."
-
-                self.state = self.State.CONFIRM_USERS
-                user_string = ", ".join(self.users)
-                return self.State.CONFIRM_USERS.value.format(users=user_string)
+                else:
+                    self.state = self.State.CONFIRM_USERS
+                    user_string = ", ".join(self.users)
+                    response = self.State.CONFIRM_USERS.value.format(
+                        users=user_string
+                    )
 
             case self.State.CONFIRM_USERS:
                 if message.lower() == "yes":
                     self.state = Done.DONE
-                    return Done.DONE.value
-                if message.lower() == "no":
+                    response = Done.DONE.value
+                elif message.lower() == "no":
                     self.state = self.State.SET_UP_USERS
-                    return self.State.CHANGE_USERS.value
+                    response = self.State.CHANGE_USERS.value
                 else:
-                    return "Answer must be 'yes' or 'no'"
+                    response = "Answer must be 'yes' or 'no'"
+
+        return response

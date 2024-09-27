@@ -5,3 +5,4 @@ database.db
 config.json
 logs
 output.txt
+.mypy_cache

@@ -21,7 +21,7 @@ class MockRequest:
     def set_message(self, message: dict) -> None:
         self.message = self.MockJson(message)
 
-    def get(self, _url: str) -> MockJson:
+    def get(self, _url: str, timeout: int = 5) -> MockJson:
         return self.message
 
 

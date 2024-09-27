@@ -52,6 +52,17 @@ class Handler:
     def __init__(self) -> None:
         raise NotImplementedError
 
+    def get_state(self) -> Enum:
+        """
+        Returns the current state of the handler.
+
+        Returns:
+        --------
+        Enum
+            The current state of the handler.
+        """
+        raise NotImplementedError
+
     def generate_response(self, message: str) -> str:
         """
         Generates a response based on the message received.
@@ -150,6 +161,9 @@ class SetupHandler(Handler):
             raise ValueError("Handler is not done yet")
 
         return {"root_name": self.root_name, "roommates": self.users}
+
+    def get_state(self) -> Enum:
+        return self.state
 
     def generate_response(self, message: str) -> str:
         response = self.state.value

@@ -73,7 +73,7 @@ class Database:
         users = self.cursor.fetchall()
 
         return [
-            User(chat_id, name, token, is_admin) for chat_id, name, token, is_admin in users
+            User(chat_id=chat_id, name=name, token=token, is_admin=is_admin) for chat_id, name, token, is_admin in users
         ]
 
     def get_user_by_name(self, name: str) -> User:

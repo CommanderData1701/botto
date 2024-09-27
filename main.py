@@ -36,10 +36,7 @@ def main() -> None:
     bot = Botto()
 
     while True:
-        try:
-            bot.get_messages()
-        except Exception as e:
-            print(e)
+        bot.get_messages()
         bot.handle_message()
 
 

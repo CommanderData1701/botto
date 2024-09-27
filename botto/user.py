@@ -1,17 +1,18 @@
+from dataclasses import dataclass
+from typing import Optional
+
 from .message_handlers import (
         Handler,
 )
-
-from dataclasses import dataclass
 
 
 @dataclass
 class User:
     name: str
-    chat_id: int = None
+    chat_id: Optional[int] = None
     is_admin: bool = False
-    token: str = None
-    handler: Handler = None
+    token: Optional[str] = None
+    handler: Optional[Handler] = None
 
     def __str__(self):
         return f"User(name={self.name}, chat_id={self.chat_id}, is_admin={self.is_admin})"
@@ -32,7 +33,6 @@ class User:
             match message:
                 case "/help":
                     return self.help()
-                
                 case _:
                     return "That is not a valid command. Type /help for a list of commands."
 

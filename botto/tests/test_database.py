@@ -36,6 +36,25 @@ class TestDatabase(unittest.TestCase):
         self.assertIsNone(user.chat_id)
         self.assertEqual(user.is_admin, True)
 
+    def test_get_users(self):
+        connection = sqlite3.connect(':memory:')
+        cursor = connection.cursor()
+        db = Database(connection)
+
+        db.create_user(name="John Doe", chat_id=43)
+        db.create_user(name="Jane Doe", is_admin=True)
+
+        users = db.get_users()
+
+        self.assertTrue(len(users) == 2)
+        self.assertTrue(all(isinstance(user, User) for user in users))
+        self.assertTrue(users[0].name == "John Doe")
+        self.assertTrue(users[0].is_admin == False)
+        self.assertTrue(users[0].chat_id == 43)
+        self.assertTrue(users[1].name == "Jane Doe")
+        self.assertTrue(users[1].is_admin == True)
+        self.assertIsNone(users[1].chat_id)
+
 
 if __name__ == "__main__":
     unittest.main()

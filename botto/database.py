@@ -1,5 +1,6 @@
 import sqlite3
 from random import choice
+from typing import Optional
 
 from .user import User
 
@@ -16,7 +17,9 @@ class Database:
 
     @staticmethod
     def generate_token():
-        return ''.join([choice('0123456789abcdefghijklmnopqrstuvwxyz') for _ in range(6)])
+        return ''.join(
+            [choice('0123456789abcdefghijklmnopqrstuvwxyz') for _ in range(6)]
+        )
 
     def __del__(self) -> None:
         self.connection.close()
@@ -40,7 +43,12 @@ class Database:
 
         self.connection.commit()
 
-    def create_user(self, name: str, chat_id: int = None, is_admin: bool = False) -> User:
+    def create_user(
+        self,
+        name: str,
+        chat_id: Optional[int] = None,
+        is_admin: bool = False
+    ) -> User:
         token = Database.generate_token()
         self.cursor.execute('''
             INSERT INTO users (chat_id, name, is_admin, token)
@@ -48,24 +56,32 @@ class Database:
         ''', (chat_id, name, is_admin, token))
         self.connection.commit()
 
-        return User(token=token, chat_id=chat_id, name=name, is_admin=is_admin == 1)
+        return User(
+            token=token, chat_id=chat_id, name=name, is_admin=is_admin == 1
+        )
 
     def update_user(self, old_user: User, new_user: User) -> User:
-        self.cursor.execute('''
+        self.cursor.execute(
+            '''
             UPDATE users
             SET chat_id = ?, name = ?, is_admin = ?
             WHERE name = ?
-        ''', (new_user.chat_id, new_user.name, new_user.is_admin, old_user.name))
+            ''', 
+            (new_user.chat_id, new_user.name, new_user.is_admin, old_user.name)
+        )
         self.connection.commit()
 
         return old_user
 
-    def update_user_name(self, old_name: str, new_name: str) -> User:
-        self.cursor.execute('UPDATE users SET name = ? WHERE name = ?', (new_name, old_name))
+    def update_user_name(self, old_name: str, new_name: str) -> None:
+        self.cursor.execute(
+            'UPDATE users SET name = ? WHERE name = ?', (new_name, old_name)
+        )
         self.connection.commit()
 
     def set_user_chat_id(self, user: User, chat_id: int) -> None:
-        self.cursor.execute('UPDATE users SET chat_id = ? WHERE name = ?', (chat_id, user.name))
+        self.cursor.execute(
+            'UPDATE users SET chat_id = ? WHERE name = ?', (chat_id, user.name))
         self.connection.commit()
 
     def get_users(self) -> list[User]:
@@ -73,11 +89,16 @@ class Database:
         users = self.cursor.fetchall()
 
         return [
-            User(chat_id=chat_id, name=name, token=token, is_admin=is_admin) for chat_id, name, token, is_admin in users
+            User(chat_id=chat_id, name=name, token=token, is_admin=is_admin)
+            for chat_id, name, token, is_admin in users
         ]
 
-    def get_user_by_name(self, name: str) -> User:
-        self.cursor.execute('SELECT chat_id, name, token, is_admin FROM users WHERE name = ?', (name,))
+    def get_user_by_name(self, name: str) -> Optional[User]:
+        self.cursor.execute(
+            'SELECT chat_id, name, token, is_admin FROM users WHERE name = ?',
+            (name,)
+        )
         user = self.cursor.fetchone()
 
-        return User(user[0], user[1], user[2], user[3])
+        return User(chat_id=user[0], name=user[1], token=user[2], 
+                    is_admin=user[3]==1) if user else None

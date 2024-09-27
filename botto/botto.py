@@ -1,6 +1,15 @@
+"""
+botto.py
+
+This module contains the Botto class, which is the main class of the bot.
+"""
+
 import json
 import os
 from typing import Optional
+import logging
+
+import requests
 
 from .user import User
 from .database import Database
@@ -11,13 +20,62 @@ from .message_handlers import (
     SetupHandler,
 )
 
-import requests
-
 
 class Botto:
+    """
+    Class represents the botto chatbot client.
+
+    Attributes:
+    ----------
+    last_updated: Optional[int]
+        The last update id of the messages.
+
+    is_configured: bool
+        Whether the bot is configured or not.
+
+    database: Database
+        The database object.
+
+    requests: requests
+        The requests object. Needs to be attribute for mocking in tests.
+
+    token: str
+        The token with which the bot client can authenticate itself.
+
+    session: Session
+        An object containing session information.
+
+    Methods:
+    --------
+    reload():
+        Reloads the session with the users from the database.
+
+    get_messages():
+        Retrieves the messages from the telegram api.
+
+    handle_message():
+        Handles the messages from the users, and sends responses.
+
+    setup():
+        Sets up the bot for the first time, with the user that writes first.
+
+    load_config():
+        Loads the configuration from the config file.
+
+    send_message(message: str, users: list[User]):
+        Sends a message to the users in the provided list.
+
+    update_config():
+        Updates the configuration file.
+
+    create_config():
+        Creates a new configuration if it does not yet exist.
+    """
     def __init__(
             self, mock_db_connection=None, mock_requests=None, mock_token=False
     ):
+        self.last_updated: Optional[int] = None
+        self.is_configured: bool = False
         try:
             self.load_config()
         except FileNotFoundError:
@@ -40,17 +98,26 @@ class Botto:
         )
 
     def reload(self):
-        self.users = self.database.get_users()
+        """
+        Reloads the session with the users from the database.
+        """
+        self.session.users = self.database.get_users()
 
     def get_messages(self) -> None:
+        """
+        Retrieves the messages from the telegram api, and stores them in the
+        session object.
+        """
         if self.last_updated:
             response = self.requests.get(
-                f'https://api.telegram.org/bot{self.token}/getUpdates?" \
-                + "offset={self.last_updated + 1}'
+                f'https://api.telegram.org/bot{self.token}/getUpdates?' \
+                + 'offset={self.last_updated + 1}',
+                timeout=5
             )
         else:
             response = self.requests.get(
-                f'https://api.telegram.org/bot{self.token}/getUpdates'
+                f'https://api.telegram.org/bot{self.token}/getUpdates',
+                timeout=5,
             )
 
         if response.status_code != 200:
@@ -88,13 +155,18 @@ class Botto:
 
         self.update_config()
 
-    def handle_message(self):
+    def handle_message(self) -> None:
+        """
+        Handles the messages from the users, and sends responses.
+        """
         if not self.is_configured and len(self.session.messages) != 0:
-            self.users.append(self.database.create_user('root', is_admin=True))
+            self.session.users.append(
+                self.database.create_user('root', is_admin=True)
+            )
             self.setup()
             self.update_config()
 
-        chat_ids = [user.chat_id for user in self.users]
+        chat_ids = [user.chat_id for user in self.session.users]
 
         registered_user_messages = [
             message
@@ -103,7 +175,7 @@ class Botto:
         ]
 
         for message in registered_user_messages:
-            user = [user for user in self.users
+            user = [user for user in self.session.users
                 if user.chat_id == message.chat_id][0]
             response = user.handle_message(message.content)
             if user.handler and user.handler.get_state() == Done.DONE:
@@ -116,13 +188,14 @@ class Botto:
                     )
 
                     for user_name in data_dict["roommates"]:
-                        self.session.user.append(
+                        self.session.users.append(
                             self.database.create_user(user_name)
                         )
 
                     message = "Here you go! All users and their tokens:\n\n" \
                     + "\n".join(
-                        [f"{user.name}: {user.token}" for user in self.users]
+                        [f"{user.name}: {user.token}"
+                                for user in self.session.users]
                     )
                     message += "\nThey just need to provide them when writing" \
                         + " to me and they can get started!"
@@ -132,47 +205,62 @@ class Botto:
                     self.update_config()
                 return
 
-
             self.send_message(response, [user])
 
         self.session.messages.clear()
 
-    def setup(self):
+    def setup(self) -> None:
+        """
+        Setup the bot for the first time, with the user that writes first.
+        """
         message = self.session.messages[0]
         chat_id = message.chat_id
         message_text = message.content
 
-        self.users[0].chat_id = chat_id
-        self.users[0].handler = SetupHandler()
+        self.session.users[0].chat_id = chat_id
+        self.session.users[0].handler = SetupHandler()
 
-        self.database.set_user_chat_id(self.users[0], chat_id)
+        self.database.set_user_chat_id(self.session.users[0], chat_id)
 
-        response = self.users[0].handler.generate_response(message_text)
+        response = self.session.users[0].handler.generate_response(message_text)
 
-        self.send_message(response, [self.users[0]])
+        self.send_message(response, [self.session.users[0]])
 
-    def load_config(self):
-        with open('config.json', 'r') as f:
+    def load_config(self) -> None:
+        """
+        Loads the configuration from the config file.
+        """
+        with open('config.json', 'r', encoding="utf-8") as f:
             config = json.load(f)
 
         self.language = config['language']
         self.is_configured = config['is_configured']
         self.last_updated = config['last_updated']
 
-    def send_message(self, message: str, users: list[User]):
+    def send_message(self, message: str, users: list[User]) -> None:
+        """
+        Sends a message to the users in the provided list.
+
+        Parameters:
+        -----------
+        message: str
+            The message to send to the users.
+
+        users: list[User]
+            The users to send the message to.
+        """
         if not message:
             return
 
         for user in users:
-            id = user.chat_id
-
-            if id:
+            if user.chat_id:
                 response = self.requests.post(
                     f'https://api.telegram.org/bot{self.token}/sendMessage',
                     json={
-                        'chat_id': id,
+                        'chat_id': user.chat_id,
                         'text': message
-                    }
+                    },
+                    timeout=5
                 )
 
                 if response.status_code != 200:
@@ -181,24 +269,32 @@ class Botto:
                     )
 
             else:
-                raise ValueError('User does not have a chat_id')
+                logging.error('User %s has no chat id', user.name)
+                return
 
-    def update_config(self):
+    def update_config(self) -> None:
+        """
+        Updates the configuration file.
+        """
         try:
-            with open('config.json', 'w') as f:
+            with open('config.json', 'w', encoding="utf-8") as f:
                 json.dump(
                     {"is_configured": self.is_configured,
                      "language": self.language,
                      "last_updated": self.last_updated
                      },f)
         except FileNotFoundError:
+            logging.info('Generating new config file.')
             self.create_config()
             self.update_config()
 
     def create_config(self):
+        """
+        Creates a new configuration if it does not yet exist
+        """
         default_config = {
             "is_configured": False, "language": "en", "last_updated": None
         }
 
-        with open('config.json', 'w') as f:
+        with open('config.json', 'w', encoding="utf-8") as f:
             json.dump(default_config, f)

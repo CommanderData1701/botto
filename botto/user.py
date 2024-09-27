@@ -55,15 +55,22 @@ class User:
     token: Optional[str] = None
     handler: Optional[Handler] = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"User(name={self.name}, chat_id={self.chat_id}," \
             + " is_admin={self.is_admin})"
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash(self.name)
 
-    def __eq__(self, other):
-        return self.name == other.name
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, User):
+            return self.name == other.name
+        if isinstance(other, str):
+            return self.name == other
+        if isinstance(other, int):
+            return self.chat_id == other
+
+        return False
 
     def handle_message(self, message: str) -> str:
         """
@@ -92,7 +99,7 @@ class User:
                 return "That is not a valid command. Type /help for a list of" \
                     + " commands."
 
-    def help(self):
+    def help(self) -> str:
         """
         Returns a help message for the user.
 

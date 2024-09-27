@@ -8,8 +8,9 @@ import json
 import os
 from typing import Optional
 import logging
+from sqlite3 import Connection
 
-import requests
+import requests # type: ignore
 
 from .user import User
 from .database import Database
@@ -19,6 +20,7 @@ from .message_handlers import (
     Done,
     SetupHandler,
 )
+from .tests.mocks import MockRequest # type: ignore
 
 
 class Botto:
@@ -72,8 +74,11 @@ class Botto:
         Creates a new configuration if it does not yet exist.
     """
     def __init__(
-            self, mock_db_connection=None, mock_requests=None, mock_token=False
-    ):
+        self,
+        mock_db_connection: Optional[Connection] = None,
+        mock_requests: Optional[MockRequest] = None,
+        mock_token: bool = False
+    ) -> None:
         self.last_updated: Optional[int] = None
         self.is_configured: bool = False
         try:
@@ -82,9 +87,9 @@ class Botto:
             self.create_config()
             self.load_config()
 
+        self.requests = requests if not mock_requests else mock_requests
         self.database = Database(mock_db_connection)
 
-        self.requests = requests if not mock_requests else mock_requests
         self.token = "ABCDEFGHIJKLMNOPQRSTUVWXZY1234567890" if mock_token \
             else os.getenv('BOT_TOKEN')
 
@@ -97,7 +102,7 @@ class Botto:
             messages = []
         )
 
-    def reload(self):
+    def reload(self) -> None:
         """
         Reloads the session with the users from the database.
         """
@@ -182,9 +187,10 @@ class Botto:
                 self.send_message(response, [user])
                 if isinstance(user.handler, SetupHandler):
                     data_dict = user.handler()
+                    new_root_name = str(data_dict["root_name"])
 
                     self.database.update_user_name(
-                        "root", data_dict["root_name"]
+                        "root", new_root_name
                     )
 
                     for user_name in data_dict["roommates"]:
@@ -192,15 +198,15 @@ class Botto:
                             self.database.create_user(user_name)
                         )
 
-                    message = "Here you go! All users and their tokens:\n\n" \
-                    + "\n".join(
+                    message_text = "Here you go! All users and their tokens:" \
+                        + "\n\n" + "\n".join(
                         [f"{user.name}: {user.token}"
                                 for user in self.session.users]
                     )
-                    message += "\nThey just need to provide them when writing" \
-                        + " to me and they can get started!"
+                    message_text += "\nThey just need to provide them when " \
+                        + " writing to me and they can get started!"
                     user.handler = None
-                    self.send_message(message, [user])
+                    self.send_message(message_text, [user])
                     self.is_configured = True
                     self.update_config()
                 return
@@ -288,7 +294,7 @@ class Botto:
             self.create_config()
             self.update_config()
 
-    def create_config(self):
+    def create_config(self) -> None:
         """
         Creates a new configuration if it does not yet exist
         """

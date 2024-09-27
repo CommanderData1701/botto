@@ -18,6 +18,7 @@ SetupHandler:
 """
 
 from enum import Enum
+from typing import Union, Any
 
 
 class Done(Enum):
@@ -79,7 +80,7 @@ class Handler:
         """
         raise NotImplementedError
 
-    def __call__(self) -> dict[str, str]:
+    def __call__(self) -> dict[str, Any]:
         """
         Provide additional information that the handler generated during the
         conversation.
@@ -152,11 +153,11 @@ class SetupHandler(Handler):
         CHANGE_USERS = "Ok, who are they then?"
 
     def __init__(self) -> None:
-        self.state = self.State.BEGIN
-        self.root_name = ""
-        self.users = []
+        self.state: Union[SetupHandler.State, Done] = self.State.BEGIN
+        self.root_name: str = "root"
+        self.users: list[str] = []
 
-    def __call__(self) -> dict:
+    def __call__(self) -> dict[str, Any]:
         if self.state != Done.DONE:
             raise ValueError("Handler is not done yet")
 
@@ -166,7 +167,7 @@ class SetupHandler(Handler):
         return self.state
 
     def generate_response(self, message: str) -> str:
-        response = self.state.value
+        response: str = self.state.value
 
         match self.state:
             case self.State.BEGIN:

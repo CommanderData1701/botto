@@ -58,7 +58,9 @@ class Database:
     get_user_by_name(name: str) -> Optional[User]:
         Gets a user by their name from the database.
     """
-    def __init__(self, mock_connection=None) -> None:
+    def __init__(
+        self, mock_connection: Optional[sqlite3.Connection] = None
+    ) -> None:
         if mock_connection:
             self.connection = mock_connection
         else:
@@ -68,7 +70,7 @@ class Database:
         self.create_tables()
 
     @staticmethod
-    def generate_token():
+    def generate_token() -> str:
         """
         Generates a random token of lenght 6 for the user.
         """

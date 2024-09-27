@@ -24,7 +24,8 @@ class TestDatabase(unittest.TestCase):
         self.assertTrue(("John Doe", None, users[0][2], 0) in users)
         self.assertTrue(("Jane Doe", None, users[1][2], 1) in users)
         self.assertTrue(all(len(token) == 6 for _, _, token, _ in users))
-        self.assertTrue(all(token.isalnum() and token == token.lower() for _, _, token, _ in users))
+        self.assertTrue(all(token.isalnum() and token == token.lower()
+            for _, _, token, _ in users))
 
         user = user_objects[0]
         self.assertEqual(user.name, "John Doe")
@@ -53,6 +54,32 @@ class TestDatabase(unittest.TestCase):
         self.assertTrue(users[1].name == "Jane Doe")
         self.assertTrue(users[1].is_admin == True)
         self.assertIsNone(users[1].chat_id)
+
+    def test_get_user_by_name(self) -> None:
+        connection = sqlite3.connect(':memory:')
+        db = Database(connection)
+
+        db.create_user(name="John Doe", chat_id=43)
+        db.create_user(name="Jane Doe", is_admin=True)
+
+        user = db.get_user_by_name("John Doe")
+        self.assertTrue(isinstance(user, User))
+        self.assertEqual(user.name, "John Doe")
+        self.assertEqual(user.chat_id, 43)
+        self.assertEqual(user.is_admin, False)
+
+        user = db.get_user_by_name("Jane Doe")
+        self.assertTrue(isinstance(user, User))
+        self.assertEqual(user.name, "Jane Doe")
+        self.assertIsNone(user.chat_id)
+        self.assertEqual(user.is_admin, True)
+
+    def test_get_user_by_name_with_no_user(self) -> None:
+        connection = sqlite3.connect(':memory:')
+        db = Database(connection)
+
+        user = db.get_user_by_name("John Doe")
+        self.assertIsNone(user)
 
 
 if __name__ == "__main__":

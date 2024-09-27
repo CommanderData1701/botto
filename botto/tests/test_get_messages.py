@@ -1,5 +1,6 @@
 import unittest
 import sqlite3
+from typing import Optional
 
 from ..botto import Botto
 from ..message import Message
@@ -7,11 +8,11 @@ from ..message import Message
 
 class MockRequest:
     class MockJson:
-        def __init__(self, data: dict = None) -> None:
+        def __init__(self, data: Optional[dict] = None) -> None:
             self.data = data
             self.status_code = 200
 
-        def json(self) -> dict:
+        def json(self) -> Optional[dict]:
             return self.data
 
     def __init__(self, message: dict) -> None:
@@ -20,7 +21,7 @@ class MockRequest:
     def set_message(self, message: dict) -> None:
         self.message = self.MockJson(message)
 
-    def get(self, _url: str) -> MockJson:
+    def get(self, _url: str, timeout: int = 5) -> MockJson:
         return self.message
 
 
@@ -51,7 +52,7 @@ class TestGetMessages(unittest.TestCase):
             Message(chat_id=42, update_id=15, content="Sheesh! XD lol")
         ]
 
-        for expected, actual in zip(expected_messages, bot.messages):
+        for expected, actual in zip(expected_messages, bot.session.messages):
             self.assertEqual(expected.chat_id, actual.chat_id)
             self.assertEqual(expected.update_id, actual.update_id)
             self.assertEqual(expected.content, actual.content)
@@ -102,7 +103,7 @@ class TestGetMessages(unittest.TestCase):
             Message(chat_id=106, update_id=105, content="Just got this new song. What do you think?"),
         ]
 
-        for expected, actual in zip(expected_messages, bot.messages):
+        for expected, actual in zip(expected_messages, bot.session.messages):
             self.assertEqual(expected.chat_id, actual.chat_id)
             self.assertEqual(expected.update_id, actual.update_id)
             self.assertEqual(expected.content, actual.content)

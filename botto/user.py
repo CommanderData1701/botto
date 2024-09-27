@@ -56,7 +56,8 @@ class User:
     handler: Optional[Handler] = None
 
     def __str__(self):
-        return f"User(name={self.name}, chat_id={self.chat_id}, is_admin={self.is_admin})"
+        return f"User(name={self.name}, chat_id={self.chat_id}," \
+            + " is_admin={self.is_admin})"
 
     def __hash__(self):
         return hash(self.name)
@@ -65,6 +66,19 @@ class User:
         return self.name == other.name
 
     def handle_message(self, message: str) -> str:
+        """
+        Handles a message from the user and provides the response.
+
+        Parameters:
+        -----------
+        message: str
+            The message from the user.
+
+        Returns:
+        --------
+        str:
+            The response to the message.
+        """
         if message == "/exit":
             self.handler = None
             return "Exited"
@@ -79,6 +93,14 @@ class User:
                     + " commands."
 
     def help(self):
+        """
+        Returns a help message for the user.
+
+        Returns:
+        --------
+        str:
+            The help message.
+        """
         message = """
         /help - Display this message
         /exit - Exit current operation

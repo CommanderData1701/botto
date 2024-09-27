@@ -75,3 +75,9 @@ class Database:
         return [
             User(chat_id, name, token, is_admin) for chat_id, name, token, is_admin in users
         ]
+
+    def get_user_by_name(self, name: str) -> User:
+        self.cursor.execute('SELECT chat_id, name, token, is_admin FROM users WHERE name = ?', (name,))
+        user = self.cursor.fetchone()
+
+        return User(user[0], user[1], user[2], user[3])

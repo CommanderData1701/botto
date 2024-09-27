@@ -137,8 +137,8 @@ class SetupHandler(Handler):
         BEGIN = "Hello! You are now the root user. What's your name?"
         CONFIRM_NAME = "Hello, {name}! Is this correct? (yes/no)"
         CHANGE_NAME = "Ok, what is it then?"
-        SET_UP_USERS = "Great! Now tell us who your roommates are. (Seperated \
-            by commas)"
+        SET_UP_USERS = "Great! Now tell us who your roommates are. (Seperated" \
+            + " by commas)"
         CONFIRM_USERS = "Are {users} your roommates? (yes/no)"
         CHANGE_USERS = "Ok, who are they then?"
 
@@ -181,12 +181,12 @@ class SetupHandler(Handler):
                 checklist.append(self.root_name)
 
                 if len(checklist) != len(set(checklist)):
-                    return "There are douplicates in the users. Please provide \
-                    a unique list of users."
+                    return "There are douplicates in the users. Please" \
+                    + " provide a unique list of users."
 
                 self.state = self.State.CONFIRM_USERS
                 user_string = ", ".join(self.users)
-                return self.State.CONFIRM_USERS.value.format(user_string)
+                return self.State.CONFIRM_USERS.value.format(users=user_string)
 
             case self.State.CONFIRM_USERS:
                 if message.lower() == "yes":

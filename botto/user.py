@@ -1,3 +1,6 @@
+"""
+Contains user class to handle business logic for the botto chatbot client users.
+"""
 from dataclasses import dataclass
 from typing import Optional
 
@@ -6,6 +9,44 @@ from .message_handlers import (
 )
 
 
+"""
+Class represents the user of the botto chatbot client.
+
+Attributes:
+----------
+name: str
+    The name of the user.
+
+chat_id: Optional[int]
+    The chat id within the telegram chatbot api
+
+is_admin: bool
+    Whether the user is an admin or not.
+
+token: Optional[str]
+    The token which a user can use to authenticate themselves.
+
+handler: Optional[Handler]
+    The handler which is used to handle messages from the user.
+
+
+Methods:
+--------
+__str__():
+    Returns a string representation of the user.
+
+__hash__():
+    Hashes the user according to their name.
+
+__eq__(other):
+    Compares the user to another user by their name.
+
+handle_message(message: str) -> str:
+    Handles a message from the user and provides the response.
+
+help():
+    Returns a help message for the user.
+"""
 @dataclass
 class User:
     name: str
@@ -14,6 +55,12 @@ class User:
     token: Optional[str] = None
     handler: Optional[Handler] = None
 
+    """
+    Returns a string representation of the user.
+
+    Returns:
+        String representation of the user.
+    """
     def __str__(self):
         return f"User(name={self.name}, chat_id={self.chat_id}, is_admin={self.is_admin})"
 
@@ -35,7 +82,6 @@ class User:
                     return self.help()
                 case _:
                     return "That is not a valid command. Type /help for a list of commands."
-
 
     def help(self):
         message = """

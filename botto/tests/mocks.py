@@ -1,6 +1,9 @@
 # type: ignore
 
+
 from typing import Optional
+from sqlite3 import Connection
+from dataclasses import dataclass
 
 
 class MockRequest:
@@ -20,3 +23,10 @@ class MockRequest:
 
     def get(self, _url: str, timeout: int = 5) -> MockJson:
         return self.message
+
+
+@dataclass
+class MockObject:
+    requests: MockRequest
+    db_connection: Connection
+    config_file: str

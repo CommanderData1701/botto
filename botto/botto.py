@@ -93,7 +93,7 @@ class Botto:
         self.database = Database() if mock is None else \
             Database(mock.db_connection)
         self.token = os.getenv('BOT_TOKEN') if mock is None else \
-            '1234567890:AAABBB'
+            'ABCDEFG'
         Botto.config_file = mock.config_file if mock is not None else \
             Botto.config_file
 
@@ -137,9 +137,11 @@ class Botto:
             case 404:
                 logging.error('Messages could not be retrieved. Maybe the ' \
                               + 'token is invalid.')
+                return
             case _:
                 logging.error('Messages could not be retrieved. Status code: ' \
                               + '%d', response.status_code)
+                return
 
         data = response.json()
         if data is None or not data['ok']:
@@ -176,7 +178,8 @@ class Botto:
         """
         Handles the messages from the users, and sends responses.
         """
-        if not self.config.is_configured and len(self.session.messages) != 0:
+        if not self.config.is_configured and len(self.session.users) == 0 \
+            and len(self.session.messages) != 0:
             self.session.users.append(
                 self.database.create_user('root', is_admin=True)
             )
@@ -204,6 +207,7 @@ class Botto:
                     self.database.update_user_name(
                         "root", new_root_name
                     )
+                    self.session.users[0].name = new_root_name
 
                     for user_name in data_dict["roommates"]:
                         self.session.users.append(
@@ -215,7 +219,7 @@ class Botto:
                         [f"{user.name}: {user.token}"
                                 for user in self.session.users]
                     )
-                    message_text += "\nThey just need to provide them when " \
+                    message_text += "\n\nThey just need to provide them when" \
                         + " writing to me and they can get started!"
                     user.handler = None
                     self.send_message(message_text, [user])
@@ -239,10 +243,6 @@ class Botto:
         self.session.users[0].handler = SetupHandler()
 
         self.database.set_user_chat_id(self.session.users[0], chat_id)
-
-        response = self.session.users[0].handler.generate_response(message_text)
-
-        self.send_message(response, [self.session.users[0]])
 
     def load_config(self) -> None:
         """
@@ -271,7 +271,7 @@ class Botto:
             return
 
         for user in users:
-            if user.chat_id:
+            if user.chat_id is not None:
                 response = self.requests.post(
                     f'https://api.telegram.org/bot{self.token}/sendMessage',
                     json={
@@ -281,10 +281,17 @@ class Botto:
                     timeout=5
                 )
 
-                if response.status_code != 200:
-                    raise RuntimeError(
-                        f'Message was not sent, code {response.status_code}'
-                    )
+                match response.status_code:
+                    case 200:
+                        pass
+                    case 404:
+                        logging.error('Message was not sent. Maybe the chat' \
+                                    + ' id is invalid.')
+                        return
+                    case _:
+                        logging.error('Message was not sent, status code: %d',
+                                    response.status_code)
+                        return
 
             else:
                 logging.error('User %s has no chat id', user.name)

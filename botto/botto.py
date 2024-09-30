@@ -237,7 +237,6 @@ class Botto:
         """
         message = self.session.messages[0]
         chat_id = message.chat_id
-        message_text = message.content
 
         self.session.users[0].chat_id = chat_id
         self.session.users[0].handler = SetupHandler()

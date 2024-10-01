@@ -1,5 +1,5 @@
 """
-message_handlers.py
+setup_handler.py
 
 Contains Handler classes to handle messages from users and generate responses.
 

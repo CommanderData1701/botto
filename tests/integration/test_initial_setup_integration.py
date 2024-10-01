@@ -3,8 +3,8 @@ import sqlite3
 import os
 from random import seed
 
-from .mocks import MockObject, MockRequest
-from ..botto import Botto
+from botto.mocks import MockObject, MockRequest
+from botto import Botto
 
 seed(42)
 

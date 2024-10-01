@@ -1,6 +1,6 @@
 import unittest
 
-from ..message_handlers import (
+from botto.message_handlers import (
     Done,
     SetupHandler
 )

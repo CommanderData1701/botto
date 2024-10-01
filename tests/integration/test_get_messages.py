@@ -2,9 +2,9 @@ import unittest
 import sqlite3
 import os
 
-from ..botto import Botto
-from ..message import Message
-from .mocks import MockRequest, MockObject
+from botto import Botto
+from botto.message import Message
+from botto.mocks import MockRequest, MockObject
 
 
 class TestGetMessages(unittest.TestCase):

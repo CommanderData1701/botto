@@ -21,7 +21,7 @@ from .message_handlers import (
     Done,
     SetupHandler,
 )
-from .tests.mocks import MockObject # type: ignore
+from .mocks import MockObject # type: ignore
 
 
 class Botto:

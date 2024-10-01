@@ -1,8 +1,8 @@
 import sqlite3
 import unittest
 
-from ..database import Database
-from ..user import User
+from botto.database import Database
+from botto.user import User
 
 
 class TestDatabase(unittest.TestCase):

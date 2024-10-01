@@ -1,6 +1,8 @@
-"""
-This module is the entry point for the botto package. It imports the Botto class
-from botto.py which does handle all logic for the bot.
+# -*- coding: utf-8 -*-
+"""Main package for the botto project.
+
+The botto package contains the main class for the bot, Botto. Rest of modules
+are not exposed since they are only used internally by the Botto class.
 """
 __all__ = ["Botto"]
 

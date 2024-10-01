@@ -1,9 +1,5 @@
-"""
-botto.py
-
-This module contains the Botto class, which is the main class of the bot.
-"""
-
+# -*- coding: utf-8 -*-
+"""Module containing the Botto class"""
 import json
 import os
 from typing import Optional
@@ -18,61 +14,29 @@ from .message import Message
 from .session import Session
 from .config import Config
 from .message_handlers import (
-    Done,
+    DONE,
     SetupHandler,
 )
-from .tests.mocks import MockObject # type: ignore
+from .mocks import MockObject # type: ignore
 
 
 class Botto:
-    """
-    Class represents the botto chatbot client.
+    """Main class for the bot.
+
+    The Botto class is the main class for the bot. It connects the messages 
+    received from the telegram api with the users and their responses. It also
+    stores the data accumulated during the conversation persistently in the 
+    database and saves information necessary after a client restart in the 
+    config file.
 
     Attributes:
-    ----------
-    last_updated: Optional[int]
-        The last update id of the messages.
-
-    is_configured: bool
-        Whether the bot is configured or not.
-
-    database: Database
-        The database object.
-
-    requests: requests
-        The requests object. Needs to be attribute for mocking in tests.
-
-    token: str
-        The token with which the bot client can authenticate itself.
-
-    session: Session
-        An object containing session information.
-
-    Methods:
-    --------
-    reload():
-        Reloads the session with the users from the database.
-
-    get_messages():
-        Retrieves the messages from the telegram api.
-
-    handle_message():
-        Handles the messages from the users, and sends responses.
-
-    setup():
-        Sets up the bot for the first time, with the user that writes first.
-
-    load_config():
-        Loads the configuration from the config file.
-
-    send_message(message: str, users: list[User]):
-        Sends a message to the users in the provided list.
-
-    update_config():
-        Updates the configuration file.
-
-    create_config():
-        Creates a new configuration if it does not yet exist.
+        config (Config): Object containing config information.
+        mock (MockObject): Object containing mock objects for testing.
+        requests (requests): Object containing the requests module or mocks.
+        database (Database): Object containing the database connection.
+        token (str): The token for the telegram bot.
+        session (Session): Object containing current session information.
+        config_file `static` (str): The name of the config file.
     """
     config_file = 'config.json'
 
@@ -109,15 +73,13 @@ class Botto:
         )
 
     def reload(self) -> None:
-        """
-        Reloads the session with the users from the database.
-        """
+        """Reloads users from the database."""
         self.session.users = self.database.get_users()
 
     def get_messages(self) -> None:
-        """
-        Retrieves the messages from the telegram api, and stores them in the
-        session object.
+        """Retrieves the messages from telegram bot api.
+        
+        Messages are stored as Message objects in the session object.
         """
         if self.config.last_updated:
             response = self.requests.get(
@@ -175,9 +137,7 @@ class Botto:
         self.update_config()
 
     def handle_message(self) -> None:
-        """
-        Handles the messages from the users, and sends responses.
-        """
+        """Handles current session messages and deletes them afterwards."""
         if not self.config.is_configured and len(self.session.users) == 0 \
             and len(self.session.messages) != 0:
             self.session.users.append(
@@ -198,7 +158,7 @@ class Botto:
             user = [user for user in self.session.users
                 if user.chat_id == message.chat_id][0]
             response = user.handle_message(message.content)
-            if user.handler and user.handler.get_state() == Done.DONE:
+            if user.handler and user.handler.get_state() == DONE:
                 self.send_message(response, [user])
                 if isinstance(user.handler, SetupHandler):
                     data_dict = user.handler()
@@ -232,9 +192,7 @@ class Botto:
         self.session.messages.clear()
 
     def setup(self) -> None:
-        """
-        Setup the bot for the first time, with the user that writes first.
-        """
+        """Set root user as first person to write to the bot."""
         message = self.session.messages[0]
         chat_id = message.chat_id
 
@@ -244,9 +202,7 @@ class Botto:
         self.database.set_user_chat_id(self.session.users[0], chat_id)
 
     def load_config(self) -> None:
-        """
-        Loads the configuration from the config file.
-        """
+        """Loads the Config object from the config file."""
         with open(Botto.config_file, 'r', encoding="utf-8") as f:
             config = json.load(f)
 
@@ -255,16 +211,11 @@ class Botto:
         self.config.last_updated = config['last_updated']
 
     def send_message(self, message: str, users: list[User]) -> None:
-        """
-        Sends a message to the users in the provided list.
-
-        Parameters:
-        -----------
-        message: str
-            The message to send to the users.
-
-        users: list[User]
-            The users to send the message to.
+        """Sends message to a list of users.
+        
+        Args:
+            message (str): The message to be sent.
+            users (list[User]): The users to send the message to.
         """
         if not message:
             return
@@ -297,8 +248,10 @@ class Botto:
                 return
 
     def update_config(self) -> None:
-        """
-        Updates the configuration file.
+        """Updates the configuration file.
+
+        The configuration file is updated with the current configuration. If the
+        file is not found it is created.
         """
         try:
             with open(Botto.config_file, 'w', encoding="utf-8") as f:
@@ -313,8 +266,18 @@ class Botto:
             self.update_config()
 
     def create_config(self) -> None:
-        """
-        Creates a new configuration if it does not yet exist
+        """Creates a new configuration if it does not yet exist
+
+        The configuration file is created with the default configuration if it
+        does not yet exist.
+
+        Example:
+            The default configuration is:
+            {
+                "is_configured": False,
+                "language": "en",
+                "last_updated": None
+            }
         """
         default_config = {
             "is_configured": False, "language": "en", "last_updated": None

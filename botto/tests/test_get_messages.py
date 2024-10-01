@@ -1,11 +1,10 @@
 import unittest
-from unittest.mock import patch
 import sqlite3
-from typing import Optional
+import os
 
 from ..botto import Botto
 from ..message import Message
-from .mocks import MockRequest
+from .mocks import MockRequest, MockObject
 
 
 class TestGetMessages(unittest.TestCase):
@@ -20,10 +19,13 @@ class TestGetMessages(unittest.TestCase):
                 {"update_id":15, "message":{"message_id":63,"from":{"id":42,"is_bot":False,"first_name":"Max Mustermann","language_code":"de"},"chat":{"id":42,"first_name":"Max Mustermann","type":"private"},"date":285131,"text":"Sheesh! XD lol"}}
             ]
         }
+        mocks = MockObject(
+            requests=MockRequest(message_dict),
+            db_connection=sqlite3.connect(':memory:'),
+            config_file="test_config.json"
+        )
         bot = Botto(
-            mock_db_connection=sqlite3.connect(':memory:'),
-            mock_requests=MockRequest(message_dict),
-            mock_token=True
+            mock = mocks
         )
 
         bot.get_messages()
@@ -39,7 +41,9 @@ class TestGetMessages(unittest.TestCase):
             self.assertEqual(expected.chat_id, actual.chat_id)
             self.assertEqual(expected.update_id, actual.update_id)
             self.assertEqual(expected.content, actual.content)
-            
+
+        os.remove("test_config.json")
+
 
     def test_messages_with_non_text_messages_and_different_users(self) -> None:
         message_dict: dict = {
@@ -73,10 +77,13 @@ class TestGetMessages(unittest.TestCase):
                 }}
             ]
         }
+        mocks = MockObject(
+            requests=MockRequest(message_dict),
+            db_connection=sqlite3.connect(':memory:'),
+            config_file="test_config.json"
+        )
         bot = Botto(
-            mock_db_connection=sqlite3.connect(':memory:'),
-            mock_requests=MockRequest(message_dict),
-            mock_token=True
+            mock = mocks
         )
 
         bot.get_messages()
@@ -90,7 +97,8 @@ class TestGetMessages(unittest.TestCase):
             self.assertEqual(expected.chat_id, actual.chat_id)
             self.assertEqual(expected.update_id, actual.update_id)
             self.assertEqual(expected.content, actual.content)
-
+        
+        os.remove("test_config.json")       
 
 
 if __name__ == '__main__':

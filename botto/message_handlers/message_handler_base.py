@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Base class for all message handlers.
-
-This module contains the base class from which all message handlers should 
-inherit.
-"""
+"""Base class for all message handlers."""
 from enum import Enum
 from typing import Any
 

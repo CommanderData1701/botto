@@ -1,6 +1,5 @@
-"""
-Contains user class to handle business logic for the botto chatbot client users.
-"""
+# -*- coding: utf-8 -*-
+"""Module for the User class."""
 from dataclasses import dataclass
 from typing import Optional
 
@@ -11,43 +10,14 @@ from .message_handlers import (
 
 @dataclass
 class User:
-    """
-    Class represents the user of the botto chatbot client.
+    """Class representing a user of the bot.
 
     Attributes:
-    ----------
-    name: str
-        The name of the user.
-
-    chat_id: Optional[int]
-        The chat id within the telegram chatbot api
-
-    is_admin: bool
-        Whether the user is an admin or not.
-
-    token: Optional[str]
-        The token which a user can use to authenticate themselves.
-
-    handler: Optional[Handler]
-        The handler which is used to handle messages from the user.
-
-
-    Methods:
-    --------
-    __str__():
-        Returns a string representation of the user.
-
-    __hash__():
-        Hashes the user according to their name.
-
-    __eq__(other):
-        Compares the user to another user by their name.
-
-    handle_message(message: str) -> str:
-        Handles a message from the user and provides the response.
-
-    help():
-        Returns a help message for the user.
+        name (str): The name of the user.
+        chat_id (Optional[int]): The chat id of the user.
+        is_admin (bool): A flag to indicate if the user is an admin.
+        token (Optional[str]): The token of the user.
+        handler (Optional[Handler]): The handler the user is currently in.
     """
     name: str
     chat_id: Optional[int] = None
@@ -56,13 +26,30 @@ class User:
     handler: Optional[Handler] = None
 
     def __str__(self) -> str:
-        return f"User(name={self.name}, chat_id={self.chat_id}," \
-            + " is_admin={self.is_admin})"
+        """Returns a string representation of the user.
+
+        Returns:
+            str: The string representation of the user.
+                (e.g. User(name=John, chat_id=123456, is_admin=True)
+        """
+        return f"User(name={self.name}, chat_id={self.chat_id}," + \
+            f" is_admin={self.is_admin})"
 
     def __hash__(self) -> int:
+        """Hashes the user by the name."""
         return hash(self.name)
 
     def __eq__(self, other: object) -> bool:
+        """Compares the user to another user, a string or an int.
+
+        Parameters:
+            other (object): The object to compare with.
+
+        Returns:
+            bool: True if other is of type User and the names are equal. If
+                other is of type str the names are compared. If other is of type
+                int the chat_id is compared.
+        """
         if isinstance(other, User):
             return self.name == other.name
         if isinstance(other, str):
@@ -73,18 +60,16 @@ class User:
         return False
 
     def handle_message(self, message: str) -> str:
-        """
-        Handles a message from the user and provides the response.
+        """Handles a message from the user.
+
+        Hanldes messages either according to the handler, or as a command 
+        entering a conversation.
 
         Parameters:
-        -----------
-        message: str
-            The message from the user.
+            message (str): The message to handle.
 
         Returns:
-        --------
-        str:
-            The response to the message.
+            str: The response to the message.
         """
         if message == "/exit":
             self.handler = None
@@ -100,13 +85,10 @@ class User:
                     + " commands."
 
     def help(self) -> str:
-        """
-        Returns a help message for the user.
+        """Returns a help message according to the user's admin status.
 
         Returns:
-        --------
-        str:
-            The help message.
+            str: The help message.
         """
         message = """
         /help - Display this message

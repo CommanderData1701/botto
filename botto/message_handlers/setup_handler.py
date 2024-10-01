@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Contains the handler class for setup converstion.
-
-This module contains the SetupHandler class that handles the setup process of
-the bot. It is only called for the first user sending a (text) message to the
-bot. That user is automatically set to the root user and is asked to provide
-the necessarry information to set up the bot for the shared flat.
-"""
+"""Contains the handler class for setup converstion."""
 from enum import Enum
 from typing import Union, Any
 from typing_extensions import override
@@ -19,7 +13,8 @@ class SetupHandler(Handler):
 
     Class handles the setup process of the bot. It returns the root user's name
     and the names of the roommates as information once the converstion has 
-    terminated.
+    terminated. It is only created for the first message of a user writing to 
+    the bot, that user is the root.
     """
     class State(Enum):
         """Enum class that represents the states of the setup conversation.

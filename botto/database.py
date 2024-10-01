@@ -1,13 +1,5 @@
-"""
-This module contains the Database class, which is responsible for managing the
-database connection and the user data.
-
-Classes:
---------
-Database:
-    Class that manages the database connection and user data.
-"""
-
+# -*- coding: utf-8 -*-
+"""Module containing the database class."""
 import sqlite3
 from random import choice
 from typing import Optional
@@ -16,47 +8,14 @@ from .user import User
 
 
 class Database:
-    """
-    Class that manages the database connection and user data.
+    """Class representing the database.
+
+    Class representation of the database connection. Database is implemented
+    using sqlite3.
 
     Attributes:
-    ----------
-    connection : sqlite3.Connection
-        The connection to the database.
-
-    cursor : sqlite3.Cursor
-        The cursor to the database.
-
-    Methods:
-    --------
-    generate_token(): (staticmethod)
-        Generates a random token for the user.
-
-    __del__():
-        Closes the connection to the database.
-
-    create_tables():
-        Creates the tables in the database if they do not exist.
-
-    create_user(
-        name: str, chat_id: Optional[int] = None, is_admin: bool = False
-    ) -> User:
-        Creates a new user in the database.
-
-    update_user(old_user: User, new_user: User) -> User:
-        Updates the user in the database.
-
-    update_user_name(old_name: str, new_name: str) -> None:
-        Updates the user's name in the database.
-
-    set_user_chat_id(user: User, chat_id: int) -> None:
-        Sets the chat id of the user in the database.
-
-    get_users() -> list[User]:
-        Gets all the users from the database.
-
-    get_user_by_name(name: str) -> Optional[User]:
-        Gets a user by their name from the database.
+        connection (sqlite3.Connection): The connection to the database.
+        cursor (sqlite3.Cursor): The cursor for the database connection.
     """
     def __init__(
         self, mock_connection: Optional[sqlite3.Connection] = None
@@ -71,20 +30,17 @@ class Database:
 
     @staticmethod
     def generate_token() -> str:
-        """
-        Generates a random token of lenght 6 for the user.
-        """
+        """Generates a six digit token made of alphanumeric characters."""
         return ''.join(
             [choice('0123456789abcdefghijklmnopqrstuvwxyz') for _ in range(6)]
         )
 
     def __del__(self) -> None:
+        """Closes the database connection."""
         self.connection.close()
 
     def create_tables(self) -> None:
-        """
-        Creates the tables in the database if they do not exist
-        """
+        """Creates the tables in the database if they do not exist."""
         self.cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             user_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,24 +65,9 @@ class Database:
         chat_id: Optional[int] = None,
         is_admin: bool = False
     ) -> User:
-        """
-        Creates a new user in the database.
+        """Creates a new user in the database.
 
         Parameters:
-        -----------
-        name : str
-            The name of the user.
-
-        chat_id : Optional[int]
-            The chat id of the user.
-
-        is_admin : bool
-            Whether the user is an admin or not.
-
-        Returns:
-        --------
-        User
-            The user object created.
         """
         token = Database.generate_token()
         self.cursor.execute('''
@@ -140,21 +81,17 @@ class Database:
         )
 
     def update_user(self, old_user: User, new_user: User) -> User:
-        """
-        Updates the user in the database.
+        """Updates user in the database.
 
         Parameters:
-        -----------
-        old_user : User
-            The old user object.
-
-        new_user : User
-            The new user object.
+            old_user (User): User to be updated.
+            new_user (User): User with updated information.
 
         Returns:
-        --------
-        User
-            The old user object.
+            User: The old user object.
+
+        Todo:
+            * Add handling for when the user is not found.
         """
         self.cursor.execute(
             '''
@@ -169,16 +106,14 @@ class Database:
         return old_user
 
     def update_user_name(self, old_name: str, new_name: str) -> None:
-        """
-        Updates the user's name in the database.
-
+        """Method for just updateing the name of a user.
+        
         Parameters:
-        -----------
-        old_name : str
-            The old name of the user.
-
-        new_name : str
-            The new name of the use
+            old_name (str): The old name of the user.
+            new_name (str): The new name of the use
+                
+        Todo:
+            * Add handling for when the user is not found
         """
         self.cursor.execute(
             'UPDATE users SET name = ? WHERE name = ?', (new_name, old_name)
@@ -186,29 +121,24 @@ class Database:
         self.connection.commit()
 
     def set_user_chat_id(self, user: User, chat_id: int) -> None:
-        """
-        Sets the chat id of the user in the database.
+        """Update chat id of a user in the database.
 
         Parameters:
-        -----------
-        user : User
-            The user object.
+            user (User): The user to update.
+            chat_id (int): The chat id to set.
 
-        chat_id : int
-            The chat id of the user.
+        Todo:
+            * Add handling for when the user is not found.
         """
         self.cursor.execute(
             'UPDATE users SET chat_id = ? WHERE name = ?', (chat_id, user.name))
         self.connection.commit()
 
     def get_users(self) -> list[User]:
-        """
-        Gets all the users from the database.
+        """Returns a list of all users in the database.
 
         Returns:
-        --------
-        list[User]
-            The list of users in the database.
+            list[User]: A list of all users in the database
         """
         self.cursor.execute('SELECT chat_id, name, token, is_admin FROM users')
         users = self.cursor.fetchall()
@@ -219,18 +149,14 @@ class Database:
         ]
 
     def get_user_by_name(self, name: str) -> Optional[User]:
-        """
-        Gets a user by their name from the database.
+        """Returns a user by name.
 
         Parameters:
-        -----------
-        name : str
-            The name of the user.
-
+            name (str): The name of the user to return.
+        
         Returns:
-        --------
-        Optional[User]
-            The user object if found, else None.
+            Optional[User]: The user with the given name or None if the user is
+                not found.
         """
         self.cursor.execute(
             'SELECT chat_id, name, token, is_admin FROM users WHERE name = ?',

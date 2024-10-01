@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Contains the global termination state for handlers."""
+"""Contains the global termination state enum for handlers."""
 from enum import Enum
 
 
@@ -15,5 +15,5 @@ class Done(Enum):
     DONE = "All set!"
 
 
-"""Exported as single variable"""
+# Exported as single variable
 DONE = Done.DONE

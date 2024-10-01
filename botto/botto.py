@@ -18,7 +18,7 @@ from .message import Message
 from .session import Session
 from .config import Config
 from .message_handlers import (
-    Done,
+    DONE,
     SetupHandler,
 )
 from .mocks import MockObject # type: ignore
@@ -198,7 +198,7 @@ class Botto:
             user = [user for user in self.session.users
                 if user.chat_id == message.chat_id][0]
             response = user.handle_message(message.content)
-            if user.handler and user.handler.get_state() == Done.DONE:
+            if user.handler and user.handler.get_state() == DONE:
                 self.send_message(response, [user])
                 if isinstance(user.handler, SetupHandler):
                     data_dict = user.handler()

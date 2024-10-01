@@ -102,8 +102,8 @@ class SetupHandler(Handler):
 
             case self.State.CONFIRM_USERS:
                 if message.lower() == "yes":
-                    self.state = Done.DONE
-                    response = Done.DONE.value
+                    self.state = DONE
+                    response = DONE.value
                 elif message.lower() == "no":
                     self.state = self.State.SET_UP_USERS
                     response = self.State.CHANGE_USERS.value

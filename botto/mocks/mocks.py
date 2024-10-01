@@ -1,12 +1,13 @@
+# type: ignore
 # -*- coding: utf-8 -*-
 """Module containing mock classes for testing purposes."""
-# type: ignore
 # pylint: disable=all
 
 
 from typing import Optional
 from sqlite3 import Connection
 from dataclasses import dataclass
+from typing import Any
 
 
 class MockRequest:
@@ -30,12 +31,12 @@ class MockRequest:
             """Returns the data of the response."""
             return self.data
 
-    def __init__(self, message: dict) -> None:
-        self.request_cache: list[dict] = []
-        self.message_sent: list[dict] = []
+    def __init__(self, message: dict[Any, Any]) -> None:
+        self.request_cache: list[dict[Any, Any]] = []
+        self.message_sent: list[dict[Any, Any]] = []
         self.message = self.MockJson(message)
 
-    def set_message(self, message: dict) -> None:
+    def set_message(self, message: dict[Any, Any]) -> None:
         """Sets the message to be returned."""
         self.message = self.MockJson(message)
 
@@ -44,7 +45,7 @@ class MockRequest:
         self.request_cache.append({"url": url, "method": "GET"})
         return self.message
     
-    def post(self, url: str, json: dict, timeout: int = 5) -> MockJson:
+    def post(self, url: str, json: dict[Any, Any], timeout: int = 5) -> MockJson:
         """Mimics a post request."""
         self.request_cache.append({"url": url, "method": "POST"})
         self.message_sent.append(json)

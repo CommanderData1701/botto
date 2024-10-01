@@ -47,6 +47,6 @@ class Handler:
 
         Returns:
             dict[str, Any]: A dictionary containing the additional information
-            gathered by the handler. Value type is not defined.
+                gathered by the handler. Value type is not defined.
         """
         raise NotImplementedError

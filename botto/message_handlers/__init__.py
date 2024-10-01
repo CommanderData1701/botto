@@ -20,8 +20,10 @@ __all__ = [
     "SetupHandler",
     "DONE",
     "Handler",
+    "Done",
 ]
 
 from .setup_handler import SetupHandler
 from .message_handler_base import Handler                           # for typing
+from .done_enum import Done                                         # for typing
 from .done_enum import DONE

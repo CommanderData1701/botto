@@ -31,8 +31,8 @@ class MockRequest:
             return self.data
 
     def __init__(self, message: dict) -> None:
-        self.request_cache = []
-        self.message_sent = []
+        self.request_cache: list[dict] = []
+        self.message_sent: list[dict] = []
         self.message = self.MockJson(message)
 
     def set_message(self, message: dict) -> None:

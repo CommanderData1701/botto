@@ -1,6 +1,20 @@
-"""
-This serves as the main file for the botto chatbot client. It requires
-the bot token as an environment variable.
+# -*- coding: utf-8 -*-
+"""Main module of the botto chatbot client.
+
+This module contains the main function that starts the bot and runs it. It 
+requires the bot token as an evnironment variable, otherwise it will exit with
+an error.
+
+Example:
+    To run the bot, simply execute the main function.
+
+        $ export BOT_TOKEN=<your-bot-token> python main.py
+
+    It is recommended to use the docker image provided.
+
+Attributes:
+    LOGFILE (str): The path to the log file. It is created on the fly and logs
+        all messages and errors that the bot receives and sends.
 """
 from datetime import datetime
 from pathlib import Path
@@ -21,18 +35,6 @@ logging.basicConfig(
 
 
 def main() -> None:
-    """
-    Main function for the botto chatbot client.
-
-    Args:
-        None
-
-    Returns:
-        None
-
-    Raises:
-        RuntimeError: If the BOT_TOKEN environment variable is not set.
-    """
     bot = Botto()
 
     while True:

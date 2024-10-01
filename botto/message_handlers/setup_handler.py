@@ -1,148 +1,42 @@
+# -*- coding: utf-8 -*-
+"""Contains the handler class for setup converstion.
+
+This module contains the SetupHandler class that handles the setup process of
+the bot. It is only called for the first user sending a (text) message to the
+bot. That user is automatically set to the root user and is asked to provide
+the necessarry information to set up the bot for the shared flat.
 """
-setup_handler.py
-
-Contains Handler classes to handle messages from users and generate responses.
-
-Classes:
---------
-Done:
-    Enum class that contains the value "DONE" to indicate that the setup process
-    is done.
-
-Handler:
-    Abstract class that defines the structure of a handler. All classes within
-    this module should inherit from this class.
-
-SetupHandler:
-    Class that handles the setup process of the bot.
-"""
-
 from enum import Enum
 from typing import Union, Any
+from typing_extensions import override
 
-
-class Done(Enum):
-    """
-    Enum class that contains the value "DONE" to indicate that the setup process
-    is done. This needs to be accessible outside of the Handler classes.
-
-    Attributes:
-    ----------
-    DONE : str
-        The value that indicates that the setup process is done.
-    """
-
-    DONE = "All set!"
-
-
-class Handler:
-    """
-    Abstract class that defines the structure of a handler. All classes within
-    this module should inherit from this class.
-
-    Methods:
-    --------
-    generate_response:
-        Abstract method that generates a response based on the message received.
-
-    __call__:
-        Provide additional information that the handler generated during the
-        conversation.
-    """
-
-    def __init__(self) -> None:
-        raise NotImplementedError
-
-    def get_state(self) -> Enum:
-        """
-        Returns the current state of the handler.
-
-        Returns:
-        --------
-        Enum
-            The current state of the handler.
-        """
-        raise NotImplementedError
-
-    def generate_response(self, message: str) -> str:
-        """
-        Generates a response based on the message received.
-
-        Parameters:
-        -----------
-        message : str
-            The message received from the user.
-
-        Returns:
-        --------
-        str
-            The response generated based on the message received.
-        """
-        raise NotImplementedError
-
-    def __call__(self) -> dict[str, Any]:
-        """
-        Provide additional information that the handler generated during the
-        conversation.
-
-        Returns:
-        --------
-        dict
-            The additional information generated during the conversation.
-        """
-        raise NotImplementedError
+from .message_handler_base import Handler
+from .done_enum import DONE, Done
 
 
 class SetupHandler(Handler):
+    """SetupHandler class that handles the setup process of the bot.
+
+    Class handles the setup process of the bot. It returns the root user's name
+    and the names of the roommates as information once the converstion has 
+    terminated.
     """
-    Class that handles the setup process of the bot.
-
-
-    Classes:
-    --------
-    State:
-        Enum class that contains the different states of the setup process.
-
-    Attributes:
-    ----------
-    root_name : str
-        The name of the root user.
-
-    state : State
-        The current state of the setup process.
-
-    users : list[str]
-        The names of the roommates.
-
-    Methods:
-    --------
-    generate_response:
-        Generates a response based on the message received.
-    """
-
     class State(Enum):
-        """
-        Enum class that contains the different states of the setup process.
+        """Enum class that represents the states of the setup conversation.
 
         Attributes:
-        ----------
-        BEGIN : str
-            The message that asks the user for their name.
-
-        CONFIRM_NAME : lambda name: str
-            The message that confirms the name of the user.
-
-        CHANGE_NAME : str
-            The message that asks the user to change their name.
-
-        SET_UP_USERS : str
-            The message that asks the user for the names of their roommates.
-
-        CONFIRM_USERS : lambda users: str
-            The message that confirms the names of the roommates.
-
-        CHANGE_USERS : str
-            The message that asks the user to change the names of the roommates.
+            BEGIN: Represents the start of the conversation. State is assigned
+                at construction of the handler.
+            CONFIRM_NAME: Asks the root user to confirm their name.
+            CHANGE_NAME: Asks the root user to provide their name again if it 
+                was not entered correctly the first time.
+            SET_UP_USERS: Asks the root user to provide the names of root user's
+                flatmates.
+            CONFIRM_USERS: Asks the root user to confirm the names of the 
+                entered flatmate names.
+            CHANGE_USERS: Asks the root user to provide the names of the
+                flatmates again if they were not entered correctly the first
+                time.
         """
         BEGIN = "Hello! You are now the root user. What's your name?"
         CONFIRM_NAME = "Hello, {name}! Is this correct? (yes/no)"
@@ -157,15 +51,18 @@ class SetupHandler(Handler):
         self.root_name: str = "root"
         self.users: list[str] = []
 
+    @override
     def __call__(self) -> dict[str, Any]:
-        if self.state != Done.DONE:
+        if self.state != DONE:
             raise ValueError("Handler is not done yet")
 
         return {"root_name": self.root_name, "roommates": self.users}
 
+    @override
     def get_state(self) -> Enum:
         return self.state
 
+    @override
     def generate_response(self, message: str) -> str:
         response: str = self.state.value
 

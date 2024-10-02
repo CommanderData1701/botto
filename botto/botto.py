@@ -66,15 +66,7 @@ class Botto:
             print('No token found in environment variables.')
             sys.exit(1)
 
-        self.session = Session(
-            users = self.database.get_users(),
-            inactive_users = [],
-            messages = []
-        )
-
-    def reload(self) -> None:
-        """Reloads users from the database."""
-        self.session.users = self.database.get_users()
+        self.active_users: list[User] = []
 
     def get_messages(self) -> None:
         """Retrieves the messages from telegram bot api.

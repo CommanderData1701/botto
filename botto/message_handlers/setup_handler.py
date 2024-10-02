@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Union, Any
 from typing_extensions import override
 
+from botto.database import Database
 from .message_handler_base import Handler
 from .done_enum import DONE, Done
 
@@ -36,12 +37,13 @@ class SetupHandler(Handler):
         BEGIN = "Hello! You are now the root user. What's your name?"
         CONFIRM_NAME = "Hello, {name}! Is this correct? (yes/no)"
         CHANGE_NAME = "Ok, what is it then?"
-        SET_UP_USERS = "Great! Now tell us who your roommates are. (Seperated" \
-            + " by commas)"
+        SET_UP_USERS = "Great! Now tell us who your roommates are. " + \
+            "(Seperated by commas)"
         CONFIRM_USERS = "Are {users} your roommates? (yes/no)"
         CHANGE_USERS = "Ok, who are they then?"
 
-    def __init__(self) -> None:
+    def __init__(self, database: Database) -> None:
+        super().__init__(database)
         self.state: Union[SetupHandler.State, Done] = self.State.BEGIN
         self.root_name: str = "root"
         self.users: list[str] = []

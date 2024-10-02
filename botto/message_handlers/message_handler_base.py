@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """Base class for all message handlers."""
 from enum import Enum
-from typing import Any
+from typing import Union, Optional
+
+from botto.database import Database
+from botto.user import User
 
 
 class Handler:
@@ -11,8 +14,8 @@ class Handler:
     basic structure that all handlers should follow.
     """
 
-    def __init__(self) -> None:
-        raise NotImplementedError
+    def __init__(self, database: Database) -> None:
+        self.database = Database()
 
     def get_state(self) -> Enum:
         """Returns the current state of the handler.
@@ -35,14 +38,15 @@ class Handler:
         """
         raise NotImplementedError
 
-    def __call__(self) -> dict[str, Any]:
-        """Returns the additional information gathered by the handler.
+    def __call__(self) -> Optional[dict[str, Union[str, dict[str, User]]]]:
+        """Information for round messages.
 
-        This method should return a dictionary containing the additional 
-        information leading to the systems state change.
+        This method returns a dictionary containing wether or not additional
+        messages have to be sent to other users.
 
         Returns:
-            dict[str, Any]: A dictionary containing the additional information
-                gathered by the handler. Value type is not defined.
+            Optional[dict[str, Union[str, dict[str, User]]]]: A dictionary
+                containing information about the round messages. None if no
+                additional messages have to be sent.
         """
         raise NotImplementedError

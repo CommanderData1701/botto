@@ -3,9 +3,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from .message_handlers import (
-        Handler,
-)
+from botto.message_handlers import Handler
+from botto.message import Message
 
 
 @dataclass
@@ -18,12 +17,16 @@ class User:
         is_admin (bool): A flag to indicate if the user is an admin.
         token (Optional[str]): The token of the user.
         handler (Optional[Handler]): The handler the user is currently in.
+
+    Todo:
+        * Add method to initialize te handler.
     """
-    name: str
+    name: Optional[str] = None
     chat_id: Optional[int] = None
     is_admin: bool = False
     token: Optional[str] = None
     handler: Optional[Handler] = None
+    message: Optional[Message] = None
 
     def __str__(self) -> str:
         """Returns a string representation of the user.
@@ -59,7 +62,7 @@ class User:
 
         return False
 
-    def handle_message(self, message: str) -> str:
+    def handle_message(self) -> str:
         """Handles a message from the user.
 
         Hanldes messages either according to the handler, or as a command 
@@ -70,6 +73,9 @@ class User:
 
         Returns:
             str: The response to the message.
+
+        Raises:
+            RuntimeError: If the handler is not implemented.
         """
         if message == "/exit":
             self.handler = None

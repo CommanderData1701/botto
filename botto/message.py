@@ -2,8 +2,6 @@
 """Module containing the Message class."""
 from dataclasses import dataclass
 
-from .user import User
-
 
 @dataclass
 class Message:
@@ -34,8 +32,6 @@ class Message:
             return self.update_id == other
         if isinstance(other, str):
             return self.content == other
-        if isinstance(other, User):
-            return self.chat_id == other.chat_id
         if isinstance(other, Message):
             return self.update_id == other.update_id
 

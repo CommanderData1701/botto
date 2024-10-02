@@ -166,7 +166,7 @@ class Database:
 
         return User(chat_id=user[0], name=user[1], token=user[2],
                     is_admin=user[3]==1) if user else None
-    
+
     def get_user_by_chat_id(self, chat_id: int) -> Optional[User]:
         """Returns a user by chat id.
 
@@ -178,7 +178,8 @@ class Database:
                 is not found.
         """
         self.cursor.execute(
-            'SELECT chat_id, name, token, is_admin FROM users WHERE chat_id = ?',
+            'SELECT chat_id, name, token, is_admin FROM users WHERE ' + \
+                'chat_id = ?',
             (chat_id,)
         )
         user = self.cursor.fetchone()

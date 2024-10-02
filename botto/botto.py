@@ -11,7 +11,6 @@ import requests # type: ignore
 from .user import User
 from .database import Database
 from .message import Message
-from .session import Session
 from .config import Config
 from .message_handlers import (
     DONE,
@@ -102,17 +101,16 @@ class Botto:
             logging.error('No messages retrieved or data is not in json format')
             return
 
+        users = self.database.get_users()
+
         for message in data['result']:
             try:
                 chat_id = message['message']['chat']['id']
                 update_id = message['update_id']
                 content = message['message']['text']
+                
+                user_present = [user for user in users if user == chat_id]
 
-                self.session.messages.append(
-                    Message(
-                        chat_id=chat_id, update_id=update_id, content=content
-                    )
-                )
 
             except KeyError:
                 continue

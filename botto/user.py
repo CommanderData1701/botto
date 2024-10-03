@@ -19,7 +19,7 @@ class User:
         handler (Optional[Handler]): The handler the user is currently in.
 
     Todo:
-        * Add method to initialize te handler.
+        * Implement the set_handler method.
     """
     name: Optional[str] = None
     chat_id: Optional[int] = None
@@ -27,6 +27,9 @@ class User:
     token: Optional[str] = None
     handler: Optional[Handler] = None
     message: Optional[Message] = None
+
+    def set_handler(self) -> None:
+        pass
 
     def __str__(self) -> str:
         """Returns a string representation of the user.
@@ -75,15 +78,15 @@ class User:
             str: The response to the message.
 
         Raises:
-            RuntimeError: If the handler is not implemented.
+            RuntimeError: If the message is None.
         """
-        if message == "/exit":
+        if self.message == "/exit" and self.handler is not None:
             self.handler = None
             return "Exited"
         if self.handler:
-            return self.handler.generate_response(message)
+            return self.handler.generate_response(self.message.content)
 
-        match message:
+        match self.message:
             case "/help":
                 return self.help()
             case _:

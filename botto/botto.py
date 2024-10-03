@@ -109,7 +109,21 @@ class Botto:
                 update_id = message['update_id']
                 content = message['message']['text']
                 
-                user_present = [user for user in users if user == chat_id]
+                user_active = [
+                    user for user in self.active_users if user == chat_id
+                ]
+                user_present = [
+                    user for user in users if user.chat_id == chat_id
+                ]
+
+                if user_active:
+                    user = user_active[0]
+                    user.message = Message(chat_id, content, update_id)
+                elif user_present:
+                    user = user_present[0]
+                    user.message = Message(chat_id, content, update_id)
+                    user.set_handler()
+
 
 
             except KeyError:

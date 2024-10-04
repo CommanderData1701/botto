@@ -18,6 +18,8 @@ from .message_handlers import (
 )
 from .mocks import MockObject # type: ignore
 
+logging.getLogger("requests").setLevel(logging.CRITICAL)
+
 
 class Botto:
     """Main class for the bot.
